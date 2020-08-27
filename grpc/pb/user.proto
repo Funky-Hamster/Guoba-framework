@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = ".;io_grpc_guoba_user";
+package main;
+
+service SearchUserService {
+  rpc Search (SearchRequest) returns (SearchResponse) {}
+}
+
+message SearchRequest {
+  string token = 1;
+}
+
+message SearchResponse {
+  int32 code = 1;
+  User data = 2;
+  string msg = 3;
+}
+
+message User {
+  string id = 1;
+  int32 name = 2;
+  string token = 3;
+}
+
+message UserList {
+  repeated User user = 1;
+}
