@@ -17,16 +17,16 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	client := pb.NewGreeterClient(conn)
+	client := pb.NewSearchUserServiceClient(conn)
 
 	// Set up a http server.
 	r := gin.Default()
-	r.GET("/rest/n/:name", func(c *gin.Context) {
-		name := c.Param("name")
+	r.GET("/guoba/user/:token", func(c *gin.Context) {
+		token := c.Param("token")
 
 		// Contact the server and print out its response.
-		req := &pb.HelloRequest{Name: name}
-		res, err := client.SayHello(c, req)
+		req := &pb.SearchRequest{Token: token}
+		res, err := client.Search(c, req)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -35,7 +35,9 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"result": fmt.Sprint(res.Message),
+			"code": fmt.Sprint(res.Code),
+			"data": fmt.Sprint(res.Data),
+			"msg": fmt.Sprint(res.Msg),
 		})
 	})
 
