@@ -4,10 +4,16 @@ package main;
 
 service SearchUserService {
   rpc Search (SearchRequest) returns (SearchResponse) {}
+  rpc AddUser (AddUserRequest) returns (SearchResponse) {}
 }
 
 message SearchRequest {
-  string token = 1;
+  string openid = 1;
+}
+
+message AddUserRequest {
+  string openid = 1;
+  string sessionKey = 2;
 }
 
 message SearchResponse {
@@ -17,9 +23,9 @@ message SearchResponse {
 }
 
 message User {
-  string id = 1;
-  int32 name = 2;
-  string token = 3;
+  int32 id = 1;
+  string sessionKey = 2;
+  string openid = 3;
 }
 
 message UserList {

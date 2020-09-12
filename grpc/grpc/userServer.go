@@ -4,6 +4,8 @@ import (
 	"log"
 	"net"
 
+	db "github.com/gin-gonic/gin/examples/grpc/db"
+	dao "github.com/gin-gonic/gin/examples/grpc/db/dao"
 	pb "github.com/gin-gonic/gin/examples/grpc/pb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -13,11 +15,32 @@ import (
 // server is used to implement helloworld.GreeterServer.
 type userServer struct{}
 
+var userDao db.IUser = dao.NewUserDao()
+
 func (s *userServer) Search(ctx context.Context, in *pb.SearchRequest) (*pb.SearchResponse, error) {
-	// Add DB connection here
-	// QueryUserById(1)
-	return &pb.SearchResponse{Code: 200, Data: nil, Msg: ""}, nil
+	var user *db.User
+	user, err := userDao.GetUserByToken(in.Openid)
+	if err != nil {
+		return &pb.SearchResponse{Code: 500, Data: nil, Msg: err.Error()}, err
+	}
+	if user == nil {
+		return &pb.SearchResponse{Code: 404, Data: nil, Msg: "Not found"}, nil
+	}
+	return &pb.SearchResponse{Code: 200, Data: &pb.User{Id: user.Id, SessionKey: user.SessionKey, Openid: user.Openid}, Msg: ""}, nil
 }
+
+func (s *userServer) AddUser(ctx context.Context, in *pb.AddUserRequest) (*pb.SearchResponse, error) {
+	user := &db.User{SessionKey: in.SessionKey, Openid: in.Openid}
+	rowID, err := userDao.AddUser(user)
+	if err != nil {
+		return &pb.SearchResponse{Code: 500, Data: nil, Msg: err.Error()}, err
+	}
+	if user == nil {
+		return &pb.SearchResponse{Code: 404, Data: nil, Msg: "Not found"}, nil
+	}
+	return &pb.SearchResponse{Code: 200, Data: &pb.User{Id: int32(rowID), SessionKey: user.SessionKey, Openid: user.Openid}, Msg: ""}, nil
+}
+
 func main() {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -32,16 +55,3 @@ func main() {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
-
-
-// func (user *UserDao) QueryUserById(id int)(*db.User,error) {
-
-// 	selectSql := "SELECT * FROM user_tb where id=?"
-// 		var us *db.User = &db.User{}
-// 		err := dbConn.Get(us,selectSql,id)
-// 		if err != nil {
-// 			return  nil,err
-// 		}
-// 		return  us,nil
-
-// }

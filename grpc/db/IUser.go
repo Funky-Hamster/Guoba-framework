@@ -24,11 +24,6 @@ type IUser interface {
 	/**
 	根据ID查询用户
 	 */
-	QueryUserById(id int) (*User,error)
+	GetUserByToken(token string) (*User,error)
 
-	/**
-	根据用户名查询用户
-	@return 用户对象集
-	 */
-	QueryUserByName(username string)([]*User,error)
 }
