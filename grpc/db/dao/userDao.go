@@ -2,15 +2,10 @@ package dao
 
 import (
 	"github.com/jmoiron/sqlx"
-	"restfulServer/db"
-	"restfulServer/db/conn"
+	"github.com/gin-gonic/gin/examples/grpc/db"
+	"github.com/gin-gonic/gin/examples/grpc/db/conn"
 )
 
-/**
-@func IUser接口的实现
-@author:柠檬191104
-@date:2020/04/26
-*/
 var dbConn *sqlx.DB
 
 func init()  {
@@ -28,14 +23,14 @@ func NewUserDao() *UserDao{
 /**
  *添加用户
  */
-func (user *UserDao) AddUser(u *db.User) (int64,error) {
+func (user *UserDao) AddUser(u *db.User) (int64, error) {
 	insert := "INSERT INTO user_tb(name,token) VALUES(?,?)"
 	stmt,err := dbConn.Prepare(insert)
 	if err != nil {
 		return 0,err
 	}
 	defer conn.CloseStmt(stmt)
-	result,err := stmt.Exec(u.Username,u.Password,u.Age,u.Sex)
+	result,err := stmt.Exec(u.Name, u.Token)
 	if err != nil {
 		return 0,err
 	}
@@ -44,7 +39,7 @@ func (user *UserDao) AddUser(u *db.User) (int64,error) {
 		return 0,err
 	}
 
-	return rowId,nil
+	return rowId, nil
 }
 
 /**
@@ -57,7 +52,7 @@ func (user *UserDao) UpdateUser(u *db.User) (int64,error) {
 		return  0,err
 	}
 	defer conn.CloseStmt(stmt)
-	result, err := stmt.Exec(u.Username,u.Password,u.Age,u.Sex,u.Id)
+	result, err := stmt.Exec(u.Name, u.Token, u.Id)
 	if err != nil {
 		return 0,err
 	}
@@ -69,12 +64,12 @@ func (user *UserDao) UpdateUser(u *db.User) (int64,error) {
 }
 
 /**
-根据ID删除用户
+根据token删除用户
 */
-func (user *UserDao) DelUserById(id int) (int64,error) {
+func (user *UserDao) DelUserById(id int) (int64, error) {
 
-	delete := "DELETE FROM user_tb where id=?"
-	result,err := dbConn.Exec(delete,id)
+	deleteSql := "DELETE FROM user_tb where id=?"
+	result,err := dbConn.Exec(deleteSql, id)
 	if err != nil {
 		return  0,err
 	}
@@ -88,14 +83,14 @@ func (user *UserDao) DelUserById(id int) (int64,error) {
 /**
 根据token查询用户
 */
-func (user *UserDao) QueryUserByToken(id int)(*db.User,error) {
+func (user *UserDao) GetUserByToken(token string)(*db.User, error) {
 
 	selectSql := "SELECT * FROM user_tb where token=?"
 	var us *db.User = &db.User{}
-	err := dbConn.Get(us,selectSql,id)
+	err := dbConn.Get(us, selectSql, token)
 	if err != nil {
-		return  nil,err
+		return  nil, err
 	}
-	return  us,nil
+	return  us, nil
 
 }
