@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/examples/grpc/db"
 	pb "github.com/gin-gonic/gin/examples/grpc/pb"
 	"google.golang.org/grpc"
 )
@@ -29,15 +30,40 @@ func main() {
 		res, err := client.Search(c, req)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
+				"code": 500,
+				"data": nil,
+				"msg":  err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": fmt.Sprint(res.Code),
-			"data": fmt.Sprint(res.Data),
-			"msg": fmt.Sprint(res.Msg),
+			"code": res.Code,
+			"data": res.Data,
+			"msg":  res.Msg,
+		})
+	})
+
+	r.POST("/guoba/user", func(c *gin.Context) {
+		//var user *db.User = &db.User{}
+		//var user db.User
+		user := &db.User{Name: c.PostForm("name"), Token: c.PostForm("token")}
+		fmt.Printf("get user data:%#v\n", user)
+		req := &pb.AddUserRequest{Token: user.Token, Name: user.Name}
+		res, err := client.AddUser(c, req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code": 500,
+				"data": nil,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": res.Code,
+			"data": res.Data,
+			"msg":  res.Msg,
 		})
 	})
 
@@ -46,5 +72,3 @@ func main() {
 		log.Fatalf("could not run server: %v", err)
 	}
 }
-
-
