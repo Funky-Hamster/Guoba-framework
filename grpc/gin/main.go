@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/examples/grpc/db"
 	pb "github.com/gin-gonic/gin/examples/grpc/pb"
 	"google.golang.org/grpc"
 )
@@ -44,13 +42,11 @@ func main() {
 		})
 	})
 
-	r.POST("/guoba/user", func(c *gin.Context) {
-		//var user *db.User = &db.User{}
-		//var user db.User
-		user := &db.User{SessionKey: c.PostForm("session_key"), Openid: c.PostForm("openid")}
-		fmt.Printf("get user data:%#v\n", user)
-		req := &pb.AddUserRequest{Openid: user.Openid, SessionKey: user.SessionKey}
-		res, err := client.AddUser(c, req)
+	r.GET("/guoba/resturant", func(c *gin.Context) {
+		client := pb.NewListRestaurantsServiceClient(conn)
+		// Contact the server and print out its response.
+		req := &pb.ListRestaurantsRequest{Limit: 1, Page: 1}
+		res, err := client.List(c, req)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code": 500,
@@ -66,6 +62,29 @@ func main() {
 			"msg":  res.Msg,
 		})
 	})
+
+	// r.POST("/guoba/user", func(c *gin.Context) {
+	// 	//var user *db.User = &db.User{}
+	// 	//var user db.User
+	// 	user := &db.User{SessionKey: c.PostForm("session_key"), Openid: c.PostForm("openid")}
+	// 	fmt.Printf("get user data:%#v\n", user)
+	// 	req := &pb.AddUserRequest{Openid: user.Openid, SessionKey: user.SessionKey}
+	// 	res, err := client.AddUser(c, req)
+	// 	if err != nil {
+	// 		c.JSON(http.StatusInternalServerError, gin.H{
+	// 			"code": 500,
+	// 			"data": nil,
+	// 			"msg":  err.Error(),
+	// 		})
+	// 		return
+	// 	}
+
+	// 	c.JSON(http.StatusOK, gin.H{
+	// 		"code": res.Code,
+	// 		"data": res.Data,
+	// 		"msg":  res.Msg,
+	// 	})
+	// })
 
 	// Run http server
 	if err := r.Run(":8052"); err != nil {

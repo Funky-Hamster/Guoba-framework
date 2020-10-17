@@ -7,14 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin/examples/grpc/db"
 	"github.com/gin-gonic/gin/examples/grpc/db/conn"
-	"github.com/jmoiron/sqlx"
 )
-
-var dbConn *sqlx.DB
-
-func init() {
-	dbConn = conn.NewDb()
-}
 
 type UserDao struct {
 }
@@ -76,7 +69,7 @@ func (user *UserDao) UpdateUser(u *db.User) (int64, error) {
 /**
 根据token删除用户
 */
-func (user *UserDao) DelUserById(id int) (int64, error) {
+func (user *UserDao) DeleteUserById(id int) (int64, error) {
 
 	deleteSql := "DELETE FROM user_tb where id=?"
 	result, err := dbConn.Exec(deleteSql, id)

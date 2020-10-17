@@ -12,7 +12,21 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-// server is used to implement helloworld.GreeterServer.
+func main() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterSearchUserServiceServer(s, &userServer{})
+	pb.RegisterListRestaurantsServiceServer(s, &resturantServer{})
+	// Register reflection service on gRPC server.
+	reflection.Register(s)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
 type userServer struct{}
 
 var userDao db.IUser = dao.NewUserDao()
@@ -41,17 +55,22 @@ func (s *userServer) AddUser(ctx context.Context, in *pb.AddUserRequest) (*pb.Se
 	return &pb.SearchResponse{Code: 200, Data: &pb.User{Id: int32(rowID), SessionKey: user.SessionKey, Openid: user.Openid}, Msg: ""}, nil
 }
 
-func main() {
-	lis, err := net.Listen("tcp", ":50051")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	pb.RegisterSearchUserServiceServer(s, &userServer{})
+type resturantServer struct{}
 
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+var resturantDao db.IResturant = dao.NewResturantDao()
+
+func (s *resturantServer) List(ctx context.Context, in *pb.ListRestaurantsRequest) (*pb.ListRestaurantsResponse, error) {
+	var resturants []*db.Resturant
+	resturants, err := resturantDao.GetResturants()
+	var resResturants []*pb.Restaurant
+	for i, resturant := range resturants {
+		resResturants[i] = &pb.Restaurant{Id: resturant.Id, Name: resturant.Name, Description: resturant.Description, Discounts: resturant.Discounts, ImgUrl: resturant.ImgUrl}
 	}
+	if err != nil {
+		return &pb.ListRestaurantsResponse{Code: 500, Data: nil, Msg: err.Error()}, err
+	}
+	if resturants == nil {
+		return &pb.ListRestaurantsResponse{Code: 404, Data: nil, Msg: "Not found"}, nil
+	}
+	return &pb.ListRestaurantsResponse{Code: 200, Data: resResturants, Msg: ""}, nil
 }

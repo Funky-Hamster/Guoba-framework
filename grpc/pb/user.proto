@@ -1,10 +1,9 @@
 syntax = "proto3";
-option go_package = ".;io_grpc_guoba_user";
+option go_package = ".;io_grpc_guoba";
 package main;
 
 service SearchUserService {
   rpc Search (SearchRequest) returns (SearchResponse) {}
-  rpc AddUser (AddUserRequest) returns (SearchResponse) {}
 }
 
 message SearchRequest {
@@ -24,7 +23,7 @@ message SearchResponse {
 
 message User {
   int32 id = 1;
-  string sessionKey = 2;
+  string session_key = 2;
   string openid = 3;
 }
 

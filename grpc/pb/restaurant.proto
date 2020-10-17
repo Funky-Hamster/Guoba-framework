@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = ".;io_grpc_guoba";
+package main;
+
+service ListRestaurantsService {
+    rpc List (ListRestaurantsRequest) returns (ListRestaurantsResponse) {}
+}
+
+message ListRestaurantsRequest {
+    int32 limit = 1;
+    int32 page = 2;
+}
+
+message ListRestaurantsResponse {
+    int32 code = 1;
+    repeated Restaurant data = 2;
+    string msg = 3;
+}
+
+message Restaurant {
+    int32 id = 1;
+    string name = 2;
+    string description = 3;
+    string discounts = 4;
+    string img_url = 5;
+    int32 num_in_action = 7;
+}
