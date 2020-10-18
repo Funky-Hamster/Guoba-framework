@@ -14,7 +14,7 @@ func NewResturantDao() *ResturantDao {
 func (r *ResturantDao) GetResturants() ([]*db.Resturant, error) {
 
 	selectSql := "SELECT * FROM resturant_tb"
-	var resturants []*db.Resturant
+	var resturants []*db.Resturant = make([]*db.Resturant, 0)
 	err := dbConn.Select(&resturants, selectSql)
 	// Not found
 	if err != nil {

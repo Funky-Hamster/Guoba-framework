@@ -62,9 +62,9 @@ var resturantDao db.IResturant = dao.NewResturantDao()
 func (s *resturantServer) List(ctx context.Context, in *pb.ListRestaurantsRequest) (*pb.ListRestaurantsResponse, error) {
 	var resturants []*db.Resturant
 	resturants, err := resturantDao.GetResturants()
-	var resResturants []*pb.Restaurant
-	for i, resturant := range resturants {
-		resResturants[i] = &pb.Restaurant{Id: resturant.Id, Name: resturant.Name, Description: resturant.Description, Discounts: resturant.Discounts, ImgUrl: resturant.ImgUrl}
+	var resResturants []*pb.Restaurant = make([]*pb.Restaurant, 0)
+	for i := range resturants {
+		resResturants = append(resResturants, &pb.Restaurant{Id: resturants[i].Id, Name: resturants[i].Name, Description: resturants[i].Description, Discounts: resturants[i].Discounts, ImgUrl: resturants[i].ImgUrl})
 	}
 	if err != nil {
 		return &pb.ListRestaurantsResponse{Code: 500, Data: nil, Msg: err.Error()}, err

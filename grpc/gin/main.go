@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	pb "github.com/gin-gonic/gin/examples/grpc/pb"
 	"google.golang.org/grpc"
@@ -87,7 +88,8 @@ func main() {
 	// })
 
 	// Run http server
-	if err := r.Run(":8052"); err != nil {
+	if err := autotls.Run(r, "guoba.online", "localhost", "www.guoba.online"); err != nil {
 		log.Fatalf("could not run server: %v", err)
 	}
+
 }
